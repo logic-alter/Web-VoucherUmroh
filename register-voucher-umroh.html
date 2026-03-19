@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrasi Jemaah — Voucher Umroh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Tajawal:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep:   #030f08;
+      --green-dark:   #071a0f;
+      --green-mid:    #0d3d1e;
+      --green-accent: #1a6b38;
+      --green-glow:   #22c55e;
+      --gold:         #c9a84c;
+      --gold-light:   #e8c96d;
+      --gold-bright:  #f5e09a;
+      --cream:        #f9f3e3;
+      --cream-dim:    rgba(249,243,227,0.55);
+      --cream-faint:  rgba(249,243,227,0.06);
+      --red-soft:     rgba(255,80,80,0.12);
+      --red-border:   rgba(255,100,100,0.25);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--green-deep);
+      color: var(--cream);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── PATTERN ── */
+    .pattern-bg {
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23c9a84c' fill-opacity='0.025'%3E%3Cpath d='M40 0l5 15h16l-13 9 5 15-13-9-13 9 5-15-13-9h16z'/%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-bg {
+      position: fixed;
+      top: -300px; left: -200px;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(26,107,56,0.12) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes shimmer { to { background-position: 250% center; } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes glow    { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes checkPop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+    .shimmer {
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 45%, var(--gold-light) 55%, var(--gold) 100%);
+      background-size: 250% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    /* ══ NAVBAR ══ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 6%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(3,15,8,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+    }
+    .nav-logo-text {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--gold-light);
+    }
+
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(249,243,227,0.5);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--gold-light); }
+
+    /* ══ PAGE LAYOUT ══ */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      padding: 100px 6% 60px;
+      max-width: 860px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    /* ══ PAGE HEADER ══ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .label-tag {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .page-sub {
+      font-size: 15px;
+      color: var(--cream-dim);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.75;
+    }
+
+    /* ══ STEP INDICATOR ══ */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 44px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .si-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .si-circle {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(201,168,76,0.25);
+      background: rgba(13,61,30,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(249,243,227,0.3);
+      transition: all 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .si-step.active .si-circle {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.12);
+      color: var(--gold);
+      box-shadow: 0 0 20px rgba(201,168,76,0.2);
+    }
+
+    .si-step.done .si-circle {
+      border-color: var(--green-glow);
+      background: rgba(34,197,94,0.12);
+      color: var(--green-glow);
+    }
+
+    .si-label {
+      font-size: 11px;
+      color: rgba(249,243,227,0.3);
+      text-align: center;
+      max-width: 80px;
+      line-height: 1.3;
+      transition: color 0.3s;
+    }
+
+    .si-step.active .si-label { color: var(--gold-light); }
+    .si-step.done .si-label  { color: var(--green-glow); }
+
+    .si-line {
+      width: 80px;
+      height: 1px;
+      background: rgba(201,168,76,0.15);
+      margin-bottom: 22px;
+      transition: background 0.4s;
+      flex-shrink: 0;
+    }
+
+    .si-line.done { background: rgba(34,197,94,0.35); }
+
+    /* ══ GLASS CARD ══ */
+    .glass-card {
+      background: rgba(255,255,255,0.025);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 24px;
+      padding: 40px;
+      animation: scaleIn 0.4s ease forwards;
+    }
+
+    /* ══ STEP 1 — ORDER VERIFICATION ══ */
+    .order-info-box {
+      background: rgba(201,168,76,0.05);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .oib-icon {
+      font-size: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .oib-text {
+      font-size: 14px;
+      color: rgba(249,243,227,0.55);
+      line-height: 1.7;
+    }
+
+    .oib-text strong {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ══ FORM ELEMENTS ══ */
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(249,243,227,0.65);
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    label .required {
+      color: var(--gold);
+      margin-left: 3px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 15px;
+      color: var(--cream);
+      outline: none;
+      transition: all 0.25s ease;
+      -webkit-appearance: none;
+    }
+
+    input::placeholder,
+    select option[disabled],
+    textarea::placeholder {
+      color: rgba(249,243,227,0.2);
+    }
+
+    select option {
+      background: #0d3d1e;
+      color: var(--cream);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    }
+
+    input.error,
+    select.error {
+      border-color: rgba(255,100,100,0.5);
+      background: var(--red-soft);
+    }
+
+    input.success {
+      border-color: rgba(34,197,94,0.4);
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: rgba(255,100,100,0.8);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .field-error.show { display: block; }
+
+    /* order-id special input */
+    .order-input-wrap {
+      position: relative;
+    }
+
+    .order-input-wrap input {
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1px;
+      font-size: 16px;
+      padding-right: 120px;
+    }
+
+    .order-check-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--green-deep);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .order-check-btn:hover {
+      box-shadow: 0 4px 14px rgba(201,168,76,0.35);
+    }
+
+    .order-check-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* qty selector */
+    .qty-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      width: fit-content;
+    }
+
+    .qty-btn {
+      width: 44px; height: 48px;
+      background: rgba(201,168,76,0.06);
+      border: none;
+      color: var(--gold-light);
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Tajawal', sans-serif;
+      line-height: 1;
+    }
+
+    .qty-btn:hover { background: rgba(201,168,76,0.12); }
+    .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .qty-val {
+      width: 60px;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold-light);
+      border: none;
+      border-left: 1px solid rgba(201,168,76,0.15);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      background: transparent;
+      padding: 0;
+      outline: none;
+      pointer-events: none;
+    }
+
+    .qty-note {
+      font-size: 13px;
+      color: rgba(249,243,227,0.35);
+      margin-top: 8px;
+    }
+
+    /* ══ STEP 2 — JEMAAH FORMS ══ */
+    .jemaah-card {
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: 18px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .jemaah-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      background: rgba(13,61,30,0.4);
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .jemaah-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .jemaah-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .jemaah-num.filled {
+      background: rgba(34,197,94,0.1);
+      border-color: rgba(34,197,94,0.3);
+      color: var(--green-glow);
+    }
+
+    .jemaah-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .jemaah-subtitle {
+      font-size: 12px;
+      color: rgba(249,243,227,0.35);
+      margin-top: 2px;
+    }
+
+    .jemaah-status {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: var(--gold);
+    }
+
+    .status-done {
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2);
+      color: var(--green-glow);
+    }
+
+    .jemaah-body {
+      padding: 28px 24px;
+      background: rgba(255,255,255,0.015);
+    }
+
+    .jemaah-toggle-icon {
+      color: rgba(249,243,227,0.3);
+      font-size: 18px;
+      transition: transform 0.3s;
+    }
+
+    .jemaah-card.open .jemaah-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* ══ PROGRESS BAR ══ */
+    .progress-wrap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 50px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: rgba(249,243,227,0.5);
+      white-space: nowrap;
+    }
+
+    .progress-text strong {
+      color: var(--gold-light);
+    }
+
+    /* ══ BUTTONS ══ */
+    .btn-gold {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #b8913e 0%, var(--gold-light) 50%, #b8913e 100%);
+      background-size: 200% auto;
+      color: #030f08;
+      font-weight: 700;
+      font-family: 'Tajawal', sans-serif;
+      padding: 14px 32px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-gold:hover:not(:disabled) {
+      background-position: right center;
+      transform: translateY(-2px);
+      box-shadow: 0 16px 48px rgba(201,168,76,0.35);
+    }
+
+    .btn-gold:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--gold-light);
+      font-weight: 600;
+      font-family: 'Tajawal', sans-serif;
+      padding: 13px 32px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(201,168,76,0.35);
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-outline:hover {
+      background: rgba(201,168,76,0.06);
+      border-color: var(--gold);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn-row-single { margin-top: 32px; }
+
+    /* ══ STEP 3 — SUCCESS ══ */
+    .success-wrap {
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    .success-icon {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.1);
+      border: 2px solid rgba(34,197,94,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 28px;
+      animation: checkPop 0.5s ease forwards;
+    }
+
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .success-sub {
+      font-size: 15px;
+      color: var(--cream-dim);
+      line-height: 1.75;
+      max-width: 440px;
+      margin: 0 auto 32px;
+    }
+
+    .success-card {
+      background: rgba(7,26,15,0.7);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 16px;
+      padding: 24px 28px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .sc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(201,168,76,0.07);
+      font-size: 14px;
+    }
+
+    .sc-row:last-child { border-bottom: none; }
+
+    .sc-label { color: rgba(249,243,227,0.4); }
+
+    .sc-value {
+      font-weight: 600;
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+    }
+
+    .sc-value.gold { color: var(--gold-light); }
+    .sc-value.green { color: var(--green-glow); }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(234,179,8,0.1);
+      border: 1px solid rgba(234,179,8,0.25);
+      color: #eab308;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 50px;
+      letter-spacing: 0.5px;
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #eab308;
+      animation: glow 1.5s ease infinite;
+    }
+
+    .success-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ══ TOAST ══ */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      max-width: 320px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: rgba(13,61,30,0.95);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: var(--green-glow);
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.error {
+      background: rgba(60,10,10,0.95);
+      border: 1px solid rgba(255,100,100,0.3);
+      color: rgba(255,130,130,0.9);
+      backdrop-filter: blur(12px);
+    }
+
+    /* ══ SPINNER ══ */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(3,15,8,0.3);
+      border-top-color: var(--green-deep);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* ══ DIVIDER ══ */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+      margin: 28px 0;
+    }
+
+    /* ══ HELPER TEXT ══ */
+    .helper {
+      font-size: 12px;
+      color: rgba(249,243,227,0.3);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 640px) {
+      .page-wrap { padding: 90px 5% 48px; }
+      .glass-card { padding: 28px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .btn-row { grid-template-columns: 1fr; }
+      .success-actions { grid-template-columns: 1fr; }
+      .si-line { width: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="pattern-bg"></div>
+<div class="glow-bg"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav>
+  <a href="landing-page-voucher-umroh.html" class="nav-logo">
+    <div class="nav-logo-icon">🕋</div>
+    <span class="nav-logo-text">Voucher Umroh</span>
+  </a>
+  <a href="landing-page-voucher-umroh.html" class="nav-back">← Kembali ke Beranda</a>
+</nav>
+
+<!-- ══ PAGE ══ -->
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="label-tag">📝 Registrasi Jemaah</div>
+    <h1 class="page-title">Daftarkan Data <span class="shimmer">Jemaah Anda</span></h1>
+    <p class="page-sub">Isi form berikut setelah pembelian voucher berhasil. Pastikan Order ID dari link.id sudah siap sebelum melanjutkan.</p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="step-indicator" id="stepIndicator">
+    <div class="si-step active" id="si-1">
+      <div class="si-circle">1</div>
+      <div class="si-label">Verifikasi Order</div>
+    </div>
+    <div class="si-line" id="si-line-1"></div>
+    <div class="si-step" id="si-2">
+      <div class="si-circle">2</div>
+      <div class="si-label">Data Jemaah</div>
+    </div>
+    <div class="si-line" id="si-line-2"></div>
+    <div class="si-step" id="si-3">
+      <div class="si-circle">3</div>
+      <div class="si-label">Selesai</div>
+    </div>
+  </div>
+
+  <!-- ════ STEP 1 — VERIFIKASI ORDER ════ -->
+  <div class="glass-card" id="step1">
+
+    <div class="order-info-box">
+      <span class="oib-icon">💡</span>
+      <div class="oib-text">
+        Masukkan <strong>Order ID</strong> yang kamu terima dari link.id setelah pembayaran berhasil. Jika belum membeli, <a href="https://link.id" style="color:var(--gold-light);">klik di sini untuk membeli voucher</a>.
+      </div>
+    </div>
+
+    <!-- ORDER ID -->
+    <div class="form-group">
+      <label>Order ID <span class="required">*</span></label>
+      <div class="order-input-wrap">
+        <input type="text" id="orderId" placeholder="Contoh: ID.0003/II" autocomplete="off" oninput="onOrderIdInput()" />
+        <button class="order-check-btn" id="checkBtn" onclick="checkOrderId()" disabled>Verifikasi</button>
+      </div>
+      <div class="field-error" id="orderIdError">Order ID tidak valid atau tidak ditemukan.</div>
+      <p class="helper">Order ID dapat ditemukan pada email konfirmasi atau halaman sukses pembayaran link.id.</p>
+    </div>
+
+    <!-- NAMA PEMBELI -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nama Pembeli <span class="required">*</span></label>
+        <input type="text" id="namaPembeli" placeholder="Nama lengkap pembeli" />
+        <div class="field-error" id="namaPembeliError">Nama pembeli wajib diisi.</div>
+      </div>
+      <div class="form-group">
+        <label>No. WhatsApp <span class="required">*</span></label>
+        <input type="tel" id="noWA" placeholder="08xx-xxxx-xxxx" />
+        <div class="field-error" id="noWAError">Nomor WhatsApp wajib diisi.</div>
+      </div>
+    </div>
+
+    <!-- JUMLAH VOUCHER -->
+    <div class="form-group">
+      <label>Jumlah Voucher / Jemaah <span class="required">*</span></label>
+      <div class="qty-wrap">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <div class="qty-val" id="qtyDisplay">1</div>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <p class="qty-note">Sesuaikan dengan jumlah voucher yang kamu beli.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btn-row-single">
+      <button class="btn-gold" onclick="goToStep2()">
+        Lanjut Isi Data Jemaah →
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ════ STEP 2 — DATA JEMAAH ════ -->
+  <div class="glass-card" id="step2" style="display:none;">
+
+    <!-- progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-text"><strong id="progressCount">0</strong> / <span id="progressTotal">1</span> terisi</div>
+    </div>
+
+    <!-- jemaah cards injected by JS -->
+    <div id="jemaahList"></div>
+
+    <div class="btn-row">
+      <button class="btn-outline" onclick="goToStep1()">← Kembali</button>
+      <button class="btn-gold" id="submitBtn" onclick="submitForm()">
+        Kirim Registrasi 🕌
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ════ STEP 3 — SUCCESS ════ -->
+  <div class="glass-card" id="step3" style="display:none;">
+    <div class="success-wrap">
+      <div class="success-icon">✓</div>
+
+      <h2 class="success-title">Registrasi <span class="shimmer">Berhasil!</span></h2>
+      <p class="success-sub">
+        Data jemaahmu sudah kami terima dan sedang dalam proses verifikasi. Tim kami akan menghubungimu via WhatsApp setelah voucher diaktifkan.
+      </p>
+
+      <div class="success-card">
+        <div class="sc-row">
+          <span class="sc-label">Order ID</span>
+          <span class="sc-value gold" id="confOrderId">—</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-label">Nama Pembeli</span>
+          <span class="sc-value" id="confNama">—</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-label">WhatsApp</span>
+          <span class="sc-value" id="confWA">—</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-label">Jumlah Jemaah</span>
+          <span class="sc-value green" id="confJumlah">—</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-label">Status</span>
+          <div class="status-pill">
+            <div class="status-dot"></div>
+            MENUNGGU KONFIRMASI
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12);border-radius:12px;padding:16px 20px;margin-bottom:28px;font-size:14px;color:rgba(249,243,227,0.5);line-height:1.7;text-align:left;">
+        ⏱ <strong style="color:var(--gold-light);">Estimasi 1×24 jam</strong> di hari kerja. Setelah voucher aktif, kamu bisa mengunduh kartu digital jemaah melalui halaman <strong style="color:var(--cream);">Tracking Voucher</strong>.
+      </div>
+
+      <div class="success-actions">
+        <a href="tracking-voucher-umroh.html" class="btn-outline" style="width:100%;">🔍 Cek Status Voucher</a>
+        <a href="https://wa.me/6285167060863" class="btn-gold" style="width:100%;text-decoration:none;">💬 Hubungi Admin</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let qty = 1;
+  let jemaahData = [];
+  let openJemaah = 0;
+
+  // ── QTY ──────────────────────────────────
+  function changeQty(delta) {
+    qty = Math.max(1, Math.min(10, qty + delta));
+    document.getElementById('qtyDisplay').textContent = qty;
+    document.querySelector('.qty-btn:first-child').disabled = qty <= 1;
+    document.querySelector('.qty-btn:last-child').disabled = qty >= 10;
+  }
+
+  // ── ORDER ID INPUT ────────────────────────
+  function onOrderIdInput() {
+    const val = document.getElementById('orderId').value.trim();
+    document.getElementById('checkBtn').disabled = val.length < 3;
+    hideError('orderIdError');
+  }
+
+  // ── CHECK ORDER ID (SIMULATED) ────────────
+  function checkOrderId() {
+    const btn = document.getElementById('checkBtn');
+    const input = document.getElementById('orderId');
+    const val = input.value.trim();
+
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      // Simulate: accept any ID that starts with "ID."
+      if (val.toUpperCase().startsWith('ID.') && val.length >= 6) {
+        input.classList.remove('error');
+        input.classList.add('success');
+        btn.innerHTML = '✓ Valid';
+        btn.style.background = 'rgba(34,197,94,0.15)';
+        btn.style.color = 'var(--green-glow)';
+        btn.style.border = '1px solid rgba(34,197,94,0.3)';
+        btn.style.background = '#0d3d1e';
+        showToast('success', '✓ Order ID ditemukan!');
+      } else {
+        input.classList.add('error');
+        showError('orderIdError');
+        btn.innerHTML = 'Verifikasi';
+        btn.disabled = false;
+        showToast('error', 'Order ID tidak valid. Periksa kembali.');
+      }
+    }, 1400);
+  }
+
+  // ── STEP NAVIGATION ───────────────────────
+  function goToStep2() {
+    // Validate step 1
+    let valid = true;
+    const nama = document.getElementById('namaPembeli').value.trim();
+    const wa   = document.getElementById('noWA').value.trim();
+    const oid  = document.getElementById('orderId').value.trim();
+
+    if (!oid) { showError('orderIdError'); valid = false; }
+    if (!nama) { showError('namaPembeliError'); valid = false; }
+    if (!wa)   { showError('noWAError'); valid = false; }
+
+    if (!valid) {
+      showToast('error', 'Lengkapi semua field terlebih dahulu.');
+      return;
+    }
+
+    // Initialize jemaah data array
+    jemaahData = Array.from({length: qty}, (_, i) => ({
+      nama: '', kota: '', travel: '', rencana: '', filled: false
+    }));
+
+    buildJemaahForms();
+    updateProgress();
+
+    // Transition
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+
+    setStep(2);
+  }
+
+  function goToStep1() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    setStep(1);
+  }
+
+  // ── BUILD JEMAAH FORMS ────────────────────
+  function buildJemaahForms() {
+    const container = document.getElementById('jemaahList');
+    document.getElementById('progressTotal').textContent = qty;
+    container.innerHTML = '';
+
+    for (let i = 0; i < qty; i++) {
+      const card = document.createElement('div');
+      card.className = 'jemaah-card' + (i === 0 ? ' open' : '');
+      card.id = `jc-${i}`;
+      card.innerHTML = `
+        <div class="jemaah-header" onclick="toggleJemaah(${i})">
+          <div class="jemaah-header-left">
+            <div class="jemaah-num" id="jnum-${i}">${i + 1}</div>
+            <div>
+              <div class="jemaah-title" id="jtitle-${i}">Jemaah ke-${i + 1}</div>
+              <div class="jemaah-subtitle">Klik untuk ${i === 0 ? 'mengisi' : 'membuka'} data</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="jemaah-status status-pending" id="jstatus-${i}">Belum Terisi</span>
+            <span class="jemaah-toggle-icon">▾</span>
+          </div>
+        </div>
+        <div class="jemaah-body" id="jbody-${i}" style="${i !== 0 ? 'display:none;' : ''}">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nama Lengkap Jemaah <span class="required">*</span></label>
+              <input type="text" id="j${i}_nama" placeholder="Nama sesuai paspor" oninput="onJemaahInput(${i})" />
+              <div class="field-error" id="j${i}_nama_err">Nama wajib diisi.</div>
+            </div>
+            <div class="form-group">
+              <label>Kota Domisili <span class="required">*</span></label>
+              <input type="text" id="j${i}_kota" placeholder="Contoh: Makassar" oninput="onJemaahInput(${i})" />
+              <div class="field-error" id="j${i}_kota_err">Kota wajib diisi.</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Travel Umroh Tujuan <span class="required">*</span></label>
+            <input type="text" id="j${i}_travel" placeholder="Nama travel yang akan digunakan" oninput="onJemaahInput(${i})" />
+            <div class="field-error" id="j${i}_travel_err">Travel tujuan wajib diisi.</div>
+            <p class="helper">Bisa diisi sekarang atau diperbarui nanti melalui admin.</p>
+          </div>
+          <div class="form-group">
+            <label>Rencana Penggunaan Voucher <span class="required">*</span></label>
+            <input type="date" id="j${i}_rencana" oninput="onJemaahInput(${i})" />
+            <div class="field-error" id="j${i}_rencana_err">Rencana tanggal wajib diisi.</div>
+            <p class="helper">Perkiraan kapan voucher akan digunakan. Bisa berubah sesuai kondisi.</p>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn-gold" style="max-width:200px;padding:11px 24px;font-size:14px;" onclick="saveJemaah(${i})">
+              Simpan Data ✓
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+  }
+
+  function toggleJemaah(i) {
+    const card = document.getElementById(`jc-${i}`);
+    const body = document.getElementById(`jbody-${i}`);
+    const isOpen = card.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.jemaah-card.open').forEach(c => {
+      c.classList.remove('open');
+      c.querySelector('.jemaah-body').style.display = 'none';
+    });
+    if (!isOpen) {
+      card.classList.add('open');
+      body.style.display = 'block';
+    }
+  }
+
+  function onJemaahInput(i) {
+    // Live update title preview
+    const nama = document.getElementById(`j${i}_nama`).value.trim();
+    if (nama) document.getElementById(`jtitle-${i}`).textContent = nama;
+    else document.getElementById(`jtitle-${i}`).textContent = `Jemaah ke-${i+1}`;
+  }
+
+  function saveJemaah(i) {
+    const nama    = document.getElementById(`j${i}_nama`).value.trim();
+    const kota    = document.getElementById(`j${i}_kota`).value.trim();
+    const travel  = document.getElementById(`j${i}_travel`).value.trim();
+    const rencana = document.getElementById(`j${i}_rencana`).value;
+
+    let valid = true;
+    if (!nama)    { document.getElementById(`j${i}_nama_err`).classList.add('show');    valid = false; }
+    else            document.getElementById(`j${i}_nama_err`).classList.remove('show');
+    if (!kota)    { document.getElementById(`j${i}_kota_err`).classList.add('show');    valid = false; }
+    else            document.getElementById(`j${i}_kota_err`).classList.remove('show');
+    if (!travel)  { document.getElementById(`j${i}_travel_err`).classList.add('show');  valid = false; }
+    else            document.getElementById(`j${i}_travel_err`).classList.remove('show');
+    if (!rencana) { document.getElementById(`j${i}_rencana_err`).classList.add('show'); valid = false; }
+    else            document.getElementById(`j${i}_rencana_err`).classList.remove('show');
+
+    if (!valid) { showToast('error', 'Lengkapi semua field jemaah ini.'); return; }
+
+    // Save
+    jemaahData[i] = { nama, kota, travel, rencana, filled: true };
+
+    // Update UI
+    document.getElementById(`jstatus-${i}`).className = 'jemaah-status status-done';
+    document.getElementById(`jstatus-${i}`).textContent = 'Terisi ✓';
+    document.getElementById(`jnum-${i}`).classList.add('filled');
+    document.getElementById(`jtitle-${i}`).textContent = nama;
+
+    updateProgress();
+    showToast('success', `✓ Data ${nama} tersimpan!`);
+
+    // Auto-open next
+    const next = i + 1;
+    if (next < qty) {
+      setTimeout(() => toggleJemaah(next), 300);
+    }
+  }
+
+  function updateProgress() {
+    const filled = jemaahData.filter(j => j.filled).length;
+    const pct = qty > 0 ? (filled / qty) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = filled;
+    document.getElementById('submitBtn').disabled = filled < qty;
+  }
+
+  // ── SUBMIT ────────────────────────────────
+  function submitForm() {
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner" style="border-color:rgba(3,15,8,0.3);border-top-color:var(--green-deep);"></span> Mengirim...';
+    btn.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+      // Fill confirmation
+      document.getElementById('confOrderId').textContent = document.getElementById('orderId').value.trim();
+      document.getElementById('confNama').textContent    = document.getElementById('namaPembeli').value.trim();
+      document.getElementById('confWA').textContent      = document.getElementById('noWA').value.trim();
+      document.getElementById('confJumlah').textContent  = qty + ' orang';
+
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'block';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      setStep(3);
+      showToast('success', '🎉 Registrasi berhasil dikirim!');
+    }, 1800);
+  }
+
+  // ── STEP INDICATOR ────────────────────────
+  function setStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById(`si-${i}`);
+      el.classList.remove('active', 'done');
+      if (i < n) el.classList.add('done');
+      else if (i === n) el.classList.add('active');
+    }
+    for (let i = 1; i <= 2; i++) {
+      const line = document.getElementById(`si-line-${i}`);
+      line.classList.toggle('done', i < n);
+    }
+  }
+
+  // ── HELPERS ──────────────────────────────
+  function showError(id) { document.getElementById(id).classList.add('show'); }
+  function hideError(id) { document.getElementById(id).classList.remove('show'); }
+
+  let toastTimer;
+  function showToast(type, msg) {
+    const t = document.getElementById('toast');
+    t.className = `toast ${type} show`;
+    t.innerHTML = (type === 'success' ? '✓ ' : '⚠ ') + msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Init qty buttons
+  changeQty(0);
+</script>
+</body>
+</html>

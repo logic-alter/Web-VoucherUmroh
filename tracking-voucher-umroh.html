@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Voucher — Voucher Umroh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Tajawal:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --green-deep:   #030f08;
+      --green-dark:   #071a0f;
+      --green-mid:    #0d3d1e;
+      --green-accent: #1a6b38;
+      --green-glow:   #22c55e;
+      --gold:         #c9a84c;
+      --gold-light:   #e8c96d;
+      --gold-bright:  #f5e09a;
+      --cream:        #f9f3e3;
+      --cream-dim:    rgba(249,243,227,0.55);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--green-deep);
+      color: var(--cream);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── BACKGROUND ── */
+    .pattern-bg {
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23c9a84c' fill-opacity='0.025'%3E%3Cpath d='M40 0l5 15h16l-13 9 5 15-13-9-13 9 5-15-13-9h16z'/%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    .glow-top {
+      position: fixed; top: -300px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(circle, rgba(26,107,56,0.12) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes shimmer    { to { background-position: 250% center; } }
+    @keyframes fadeUp     { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes scaleIn    { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+    @keyframes spin       { to { transform: rotate(360deg); } }
+    @keyframes glow       { 0%,100% { opacity:.5; } 50% { opacity:1; } }
+    @keyframes float      { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+    @keyframes pulseRing  { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.2); } 50% { box-shadow: 0 0 0 12px rgba(34,197,94,0); } }
+    @keyframes cardReveal { from { opacity:0; transform:translateY(32px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes pendingPulse { 0%,100% { box-shadow:0 0 0 0 rgba(234,179,8,0.2); } 50% { box-shadow:0 0 0 10px rgba(234,179,8,0); } }
+
+    .shimmer {
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 45%, var(--gold-light) 55%, var(--gold) 100%);
+      background-size: 250% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    /* ══ NAVBAR ══ */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      padding: 0 6%; height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(3,15,8,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .nav-logo-icon {
+      width:34px; height:34px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px;
+    }
+    .nav-logo-text {
+      font-family:'Playfair Display',serif; font-weight:700; font-size:17px; color:var(--gold-light);
+    }
+    .nav-back {
+      display:flex; align-items:center; gap:6px;
+      color:rgba(249,243,227,0.5); text-decoration:none; font-size:14px; transition:color 0.2s;
+    }
+    .nav-back:hover { color:var(--gold-light); }
+
+    /* ══ PAGE LAYOUT ══ */
+    .page-wrap {
+      position:relative; z-index:1;
+      padding: 100px 6% 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ══ PAGE HEADER ══ */
+    .page-header {
+      text-align:center; margin-bottom:48px;
+      animation: fadeUp 0.6s ease forwards;
+    }
+    .label-tag {
+      display:inline-block; font-size:11px; letter-spacing:3px;
+      color:var(--gold); margin-bottom:14px; font-weight:500;
+    }
+    .page-title {
+      font-family:'Playfair Display',serif;
+      font-size: clamp(28px,4vw,44px);
+      font-weight:700; line-height:1.2; margin-bottom:12px;
+    }
+    .page-sub {
+      font-size:15px; color:var(--cream-dim);
+      max-width:520px; margin:0 auto; line-height:1.75;
+    }
+
+    /* ══ SEARCH BOX ══ */
+    .search-card {
+      background: rgba(255,255,255,0.025);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 24px;
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .search-label {
+      font-size:13px; font-weight:600; color:rgba(249,243,227,0.6);
+      letter-spacing:0.3px; margin-bottom:10px; display:block;
+    }
+
+    .search-row {
+      display:grid; grid-template-columns:1fr auto;
+      gap:12px; align-items:center;
+    }
+
+    .code-input {
+      width:100%;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(201,168,76,0.2);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-family:'DM Mono',monospace;
+      font-size:18px;
+      letter-spacing:3px;
+      color:var(--cream);
+      outline:none;
+      transition:all 0.25s;
+      text-transform:uppercase;
+    }
+    .code-input::placeholder { color:rgba(249,243,227,0.18); letter-spacing:2px; font-size:14px; }
+    .code-input:focus {
+      border-color:rgba(201,168,76,0.5);
+      background:rgba(255,255,255,0.06);
+      box-shadow:0 0 0 3px rgba(201,168,76,0.08);
+    }
+
+    .search-btn {
+      height:56px; min-width:140px;
+      background: linear-gradient(135deg, #b8913e, var(--gold-light), #b8913e);
+      background-size:200% auto;
+      color:var(--green-deep);
+      font-family:'Tajawal',sans-serif;
+      font-weight:700; font-size:15px;
+      border:none; border-radius:14px;
+      cursor:pointer; transition:all 0.3s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      white-space:nowrap;
+    }
+    .search-btn:hover {
+      background-position:right center;
+      box-shadow:0 12px 36px rgba(201,168,76,0.35);
+      transform:translateY(-1px);
+    }
+    .search-btn:disabled { opacity:0.45; cursor:not-allowed; transform:none; }
+
+    .search-helper {
+      font-size:12px; color:rgba(249,243,227,0.28);
+      margin-top:10px; line-height:1.6;
+    }
+
+    /* demo codes */
+    .demo-codes {
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;
+    }
+    .demo-pill {
+      font-family:'DM Mono',monospace;
+      font-size:11px; padding:5px 12px;
+      background:rgba(201,168,76,0.06);
+      border:1px solid rgba(201,168,76,0.15);
+      border-radius:50px; color:var(--gold);
+      cursor:pointer; transition:all 0.2s;
+      letter-spacing:1px;
+    }
+    .demo-pill:hover { background:rgba(201,168,76,0.12); border-color:rgba(201,168,76,0.3); }
+
+    /* ══ RESULT AREA ══ */
+    #resultArea { display:none; }
+
+    /* ── PENDING STATE ── */
+    .pending-card {
+      background: rgba(234,179,8,0.04);
+      border: 1px solid rgba(234,179,8,0.2);
+      border-radius:20px; padding:40px;
+      text-align:center;
+      animation: scaleIn 0.4s ease forwards;
+    }
+    .pending-icon {
+      width:72px; height:72px; border-radius:50%;
+      background:rgba(234,179,8,0.08);
+      border:1.5px solid rgba(234,179,8,0.25);
+      display:flex; align-items:center; justify-content:center;
+      font-size:30px; margin:0 auto 20px;
+      animation: pendingPulse 2s ease infinite;
+    }
+    .pending-title {
+      font-family:'Playfair Display',serif;
+      font-size:24px; font-weight:700; margin-bottom:10px; color:#eab308;
+    }
+    .pending-sub { font-size:15px; color:var(--cream-dim); line-height:1.75; margin-bottom:24px; }
+
+    /* ── NOT FOUND STATE ── */
+    .notfound-card {
+      background:rgba(255,80,80,0.04);
+      border:1px solid rgba(255,100,100,0.15);
+      border-radius:20px; padding:40px; text-align:center;
+      animation: scaleIn 0.4s ease forwards;
+    }
+    .notfound-icon { font-size:40px; margin-bottom:16px; display:block; }
+    .notfound-title {
+      font-family:'Playfair Display',serif;
+      font-size:22px; font-weight:700; margin-bottom:10px; color:rgba(255,130,130,0.85);
+    }
+    .notfound-sub { font-size:14px; color:var(--cream-dim); line-height:1.75; margin-bottom:20px; }
+
+    /* ── ACTIVE STATE — DIGITAL CARD ── */
+    .active-wrap {
+      animation: cardReveal 0.5s ease forwards;
+    }
+
+    .active-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:24px; flex-wrap:wrap; gap:12px;
+    }
+    .active-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(34,197,94,0.08);
+      border:1px solid rgba(34,197,94,0.25);
+      color:var(--green-glow);
+      font-size:12px; font-weight:700;
+      padding:6px 16px; border-radius:50px; letter-spacing:0.5px;
+    }
+    .active-dot { width:7px; height:7px; border-radius:50%; background:var(--green-glow); animation:glow 1.5s ease infinite; }
+
+    .download-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      background:linear-gradient(135deg,#b8913e,var(--gold-light),#b8913e);
+      background-size:200% auto;
+      color:var(--green-deep);
+      font-family:'Tajawal',sans-serif; font-weight:700;
+      font-size:14px; padding:10px 24px;
+      border:none; border-radius:50px;
+      cursor:pointer; transition:all 0.3s;
+    }
+    .download-btn:hover {
+      background-position:right center;
+      box-shadow:0 8px 24px rgba(201,168,76,0.35);
+      transform:translateY(-1px);
+    }
+    .download-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    /* ══ DIGITAL CARD ══ */
+    /* This is the card that gets rendered to PNG */
+    #digitalCard {
+      width: 780px;
+      height: 460px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #031a0a 0%, #052e12 35%, #031a0a 100%);
+      border-radius: 20px;
+      font-family: 'Tajawal', sans-serif;
+      /* Scale for display on screen */
+      transform-origin: top left;
+    }
+
+    .card-preview-wrap {
+      width:100%;
+      overflow:hidden;
+      border-radius:20px;
+      border:1px solid rgba(201,168,76,0.3);
+      box-shadow:
+        0 0 0 1px rgba(201,168,76,0.1),
+        0 40px 80px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(201,168,76,0.15);
+      margin-bottom:20px;
+      /* Display at ~70% scale */
+      position:relative;
+    }
+
+    /* inner wrapper for scaling */
+    .card-scale-wrap {
+      width:780px;
+      transform-origin: top left;
+    }
+
+    /* ── Card Layers ── */
+    .dc-bg-hex {
+      position:absolute; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpath d='M30 0l15 26-15 26-15-26z' fill='none' stroke='%23c9a84c' stroke-opacity='0.04' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 60px 52px;
+    }
+
+    .dc-glow-tl {
+      position:absolute; top:-80px; left:-80px;
+      width:320px; height:320px;
+      background:radial-gradient(circle, rgba(0,200,100,0.12) 0%, transparent 65%);
+      border-radius:50%;
+    }
+    .dc-glow-br {
+      position:absolute; bottom:-60px; right:200px;
+      width:240px; height:240px;
+      background:radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 65%);
+      border-radius:50%;
+    }
+
+    /* right panel islamic pattern */
+    .dc-right-panel {
+      position:absolute;
+      right:0; top:0; bottom:0;
+      width:230px;
+      background: linear-gradient(135deg, #1a3a7a 0%, #2a4a9a 50%, #1a3a7a 100%);
+      clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+
+    .dc-right-pattern {
+      position:absolute; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect x='10' y='2' width='20' height='36' rx='2' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='1.5'/%3E%3Crect x='2' y='10' width='36' height='20' rx='2' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='6' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='1.5'/%3E%3C/svg%3E");
+      background-size:40px 40px;
+      opacity:0.7;
+    }
+
+    /* gold accent lines */
+    .dc-gold-line-top {
+      position:absolute;
+      top:52px; left:0; right:0;
+      height:2px;
+      background:linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-light) 55%, transparent 85%);
+    }
+    .dc-gold-line-bottom {
+      position:absolute;
+      top:58px; left:0; right:0;
+      height:1px;
+      background:linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.4) 30%, transparent 75%);
+    }
+
+    /* top arc element */
+    .dc-top-arc {
+      position:absolute;
+      top:0; left:50px; right:230px;
+      height:56px;
+      border-bottom:1.5px solid rgba(201,168,76,0.5);
+      border-left:1.5px solid rgba(201,168,76,0.3);
+      border-right:1.5px solid rgba(201,168,76,0.3);
+      border-radius:0 0 50% 50%;
+    }
+
+    /* logo top center */
+    .dc-logo-area {
+      position:absolute;
+      top:6px;
+      left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      z-index:2;
+    }
+    .dc-logo-icon {
+      width:38px; height:38px;
+      background:linear-gradient(135deg,var(--gold),var(--gold-light));
+      border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+      box-shadow:0 0 16px rgba(201,168,76,0.4);
+    }
+    .dc-logo-name {
+      font-size:9px; letter-spacing:2px;
+      color:rgba(201,168,76,0.7); font-weight:500;
+    }
+
+    /* main content area */
+    .dc-content {
+      position:absolute;
+      top:80px; left:36px; right:248px; bottom:24px;
+      display:flex; flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .dc-title-row {
+      margin-bottom:16px;
+    }
+    .dc-pretitle {
+      font-size:9px; letter-spacing:3px;
+      color:rgba(201,168,76,0.5); margin-bottom:4px;
+    }
+    .dc-title {
+      font-family:'Playfair Display',serif;
+      font-size:26px; font-weight:700;
+      color:var(--cream); letter-spacing:2px;
+      text-shadow:0 0 20px rgba(201,168,76,0.2);
+    }
+
+    .dc-fields {
+      flex:1; display:flex; flex-direction:column; gap:0;
+    }
+
+    .dc-field {
+      display:flex; align-items:baseline; gap:10px;
+      padding:7px 0;
+      border-bottom:1px solid rgba(201,168,76,0.08);
+    }
+    .dc-field:last-child { border-bottom:none; }
+
+    .dc-field-label {
+      font-size:9px; letter-spacing:1.5px;
+      color:rgba(249,243,227,0.35); min-width:110px; flex-shrink:0;
+      text-transform:uppercase;
+    }
+    .dc-field-value {
+      font-size:13px; font-weight:500; color:var(--cream);
+      flex:1; line-height:1.3;
+    }
+    .dc-field-value.code-val {
+      font-family:'DM Mono',monospace;
+      letter-spacing:2px; font-size:12px;
+      color:var(--gold-light);
+    }
+
+    /* bottom row */
+    .dc-bottom {
+      display:flex; align-items:flex-end; justify-content:space-between;
+      margin-top:12px;
+    }
+
+    .dc-qr-wrap {
+      width:80px; height:80px;
+      background:#fff;
+      border-radius:6px;
+      padding:5px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+
+    .dc-amount-box {
+      text-align:right;
+    }
+    .dc-amount-label {
+      font-size:8px; letter-spacing:2px;
+      color:rgba(249,243,227,0.35); margin-bottom:4px;
+    }
+    .dc-amount-val {
+      font-family:'Playfair Display',serif;
+      font-size:22px; font-weight:700;
+    }
+    .dc-amount-note {
+      font-size:9px; color:rgba(249,243,227,0.3); margin-top:2px;
+    }
+
+    /* status stamp */
+    .dc-stamp {
+      position:absolute;
+      bottom:28px; right:248px;
+      font-size:9px; letter-spacing:2px;
+      color:rgba(34,197,94,0.6); font-weight:700;
+      border:1px solid rgba(34,197,94,0.2);
+      padding:3px 10px; border-radius:50px;
+      background:rgba(34,197,94,0.05);
+    }
+
+    /* ══ INFO STRIPS BELOW CARD ══ */
+    .info-strips {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px; margin-top:4px;
+    }
+    .info-strip {
+      background:rgba(255,255,255,0.025);
+      border:1px solid rgba(201,168,76,0.1);
+      border-radius:12px; padding:14px 16px;
+    }
+    .is-label { font-size:10px; letter-spacing:1.5px; color:rgba(249,243,227,0.3); margin-bottom:4px; }
+    .is-value { font-size:13px; font-weight:600; color:var(--cream); }
+    .is-value.green { color:var(--green-glow); }
+    .is-value.gold  { color:var(--gold-light); font-family:'DM Mono',monospace; letter-spacing:1px; }
+
+    /* ══ USED STATE ══ */
+    .used-card {
+      background:rgba(100,100,100,0.04);
+      border:1px solid rgba(150,150,150,0.15);
+      border-radius:20px; padding:40px; text-align:center;
+      animation: scaleIn 0.4s ease forwards;
+    }
+
+    /* ══ BUTTONS GENERIC ══ */
+    .btn-outline {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:transparent; color:var(--gold-light);
+      font-weight:600; font-family:'Tajawal',sans-serif;
+      padding:12px 28px; border-radius:50px;
+      border:1.5px solid rgba(201,168,76,0.35);
+      cursor:pointer; font-size:14px; transition:all 0.3s;
+      text-decoration:none;
+    }
+    .btn-outline:hover { background:rgba(201,168,76,0.06); border-color:var(--gold); }
+
+    .btn-wa {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:rgba(37,211,102,0.1); color:#25d366;
+      font-weight:600; font-family:'Tajawal',sans-serif;
+      padding:12px 28px; border-radius:50px;
+      border:1.5px solid rgba(37,211,102,0.25);
+      cursor:pointer; font-size:14px; transition:all 0.3s;
+      text-decoration:none;
+    }
+    .btn-wa:hover { background:rgba(37,211,102,0.15); }
+
+    .action-row {
+      display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:center; margin-top:16px;
+    }
+
+    /* ══ SPINNER ══ */
+    .spinner {
+      width:18px; height:18px;
+      border:2px solid rgba(3,15,8,0.3);
+      border-top-color:var(--green-deep);
+      border-radius:50%; animation:spin 0.7s linear infinite;
+      display:inline-block; vertical-align:middle;
+    }
+    .spinner-cream {
+      border:2px solid rgba(201,168,76,0.2);
+      border-top-color:var(--gold);
+    }
+
+    /* ══ TOAST ══ */
+    .toast {
+      position:fixed; bottom:28px; right:28px; z-index:999;
+      padding:14px 20px; border-radius:12px; font-size:14px; font-weight:600;
+      display:flex; align-items:center; gap:10px;
+      opacity:0; transform:translateY(10px); transition:all 0.3s;
+      pointer-events:none; max-width:320px;
+      backdrop-filter:blur(12px);
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.success { background:rgba(13,61,30,0.95); border:1px solid rgba(34,197,94,0.3); color:var(--green-glow); }
+    .toast.error   { background:rgba(60,10,10,0.95); border:1px solid rgba(255,100,100,0.3); color:rgba(255,130,130,0.9); }
+    .toast.info    { background:rgba(20,40,70,0.95); border:1px solid rgba(100,150,255,0.3); color:rgba(150,180,255,0.9); }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width:860px) {
+      .search-row { grid-template-columns:1fr; }
+      .search-btn { width:100%; }
+      .info-strips { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width:600px) {
+      .page-wrap { padding:90px 5% 60px; }
+      .search-card { padding:24px 20px; }
+      .info-strips { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="pattern-bg"></div>
+<div class="glow-top"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav>
+  <a href="landing-page-voucher-umroh.html" class="nav-logo">
+    <div class="nav-logo-icon">🕋</div>
+    <span class="nav-logo-text">Voucher Umroh</span>
+  </a>
+  <a href="landing-page-voucher-umroh.html" class="nav-back">← Kembali ke Beranda</a>
+</nav>
+
+<!-- ══ PAGE ══ -->
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="label-tag">🔍 Tracking Voucher</div>
+    <h1 class="page-title">Cek Status <span class="shimmer">Voucher Anda</span></h1>
+    <p class="page-sub">Masukkan kode unik voucher untuk melihat status dan mengunduh kartu digital jemaah Anda.</p>
+  </div>
+
+  <!-- SEARCH BOX -->
+  <div class="search-card">
+    <span class="search-label">Kode Voucher</span>
+    <div class="search-row">
+      <input
+        class="code-input"
+        id="codeInput"
+        type="text"
+        placeholder="UV-XXXX-XXXX"
+        maxlength="20"
+        autocomplete="off"
+        oninput="onCodeInput()"
+        onkeydown="if(event.key==='Enter') doSearch()"
+      />
+      <button class="search-btn" id="searchBtn" onclick="doSearch()" disabled>
+        🔍 Cek Voucher
+      </button>
+    </div>
+    <p class="search-helper">Kode voucher dikirimkan oleh admin via WhatsApp setelah pembayaran dikonfirmasi. Format: UV-XXXX-XXXX</p>
+
+    <!-- Demo codes -->
+    <div>
+      <p style="font-size:11px;color:rgba(249,243,227,0.2);margin-top:16px;margin-bottom:8px;letter-spacing:1px;">KODE DEMO — KLIK UNTUK MENCOBA:</p>
+      <div class="demo-codes">
+        <span class="demo-pill" onclick="tryCode('UV-A1B2-C3D4')">UV-A1B2-C3D4 · Aktif</span>
+        <span class="demo-pill" onclick="tryCode('UV-PEND-0001')">UV-PEND-0001 · Pending</span>
+        <span class="demo-pill" onclick="tryCode('UV-USED-9999')">UV-USED-9999 · Terpakai</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultArea"></div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden card for PNG export (full size, off-screen) -->
+<div id="exportWrap" style="position:fixed;left:-9999px;top:-9999px;z-index:-1;"></div>
+
+<script>
+  // ── MOCK DATABASE ─────────────────────────
+  const DB = {
+    'UV-A1B2-C3D4': {
+      status: 'active',
+      kode: 'UV-A1B2-C3D4',
+      nama: 'Siti Rahmadhani',
+      kota: 'Makassar',
+      travel: 'Al-Furqon Travel',
+      rencana: '2026-08-15',
+      order_id: 'ID.0003/II',
+      created_at: '2026-03-01',
+    },
+    'UV-PEND-0001': {
+      status: 'pending',
+      kode: 'UV-PEND-0001',
+      nama: 'Ahmad Fauzi',
+      kota: 'Surabaya',
+      travel: 'Berkah Umroh',
+      rencana: '2026-10-20',
+      order_id: 'ID.0007/I',
+      created_at: '2026-03-10',
+    },
+    'UV-USED-9999': {
+      status: 'used',
+      kode: 'UV-USED-9999',
+      nama: 'Budi Santoso',
+      kota: 'Bandung',
+      travel: 'Mina Tour',
+      rencana: '2025-12-05',
+      order_id: 'ID.0001/XII',
+      created_at: '2025-11-01',
+    },
+  };
+
+  // ── INPUT HANDLER ─────────────────────────
+  function onCodeInput() {
+    const val = document.getElementById('codeInput').value.trim();
+    document.getElementById('searchBtn').disabled = val.length < 3;
+  }
+
+  function tryCode(code) {
+    document.getElementById('codeInput').value = code;
+    onCodeInput();
+    doSearch();
+  }
+
+  // ── SEARCH ────────────────────────────────
+  function doSearch() {
+    const btn  = document.getElementById('searchBtn');
+    const code = document.getElementById('codeInput').value.trim().toUpperCase();
+    const area = document.getElementById('resultArea');
+
+    if (!code) return;
+
+    btn.innerHTML = '<span class="spinner"></span> Mencari...';
+    btn.disabled  = true;
+    area.style.display = 'none';
+
+    setTimeout(() => {
+      btn.innerHTML = '🔍 Cek Voucher';
+      btn.disabled  = false;
+
+      const voucher = DB[code];
+      if (!voucher) {
+        renderNotFound(code);
+      } else if (voucher.status === 'pending') {
+        renderPending(voucher);
+      } else if (voucher.status === 'used') {
+        renderUsed(voucher);
+      } else {
+        renderActive(voucher);
+      }
+
+      area.style.display = 'block';
+      area.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 1200);
+  }
+
+  // ── RENDER NOT FOUND ──────────────────────
+  function renderNotFound(code) {
+    document.getElementById('resultArea').innerHTML = `
+      <div class="notfound-card">
+        <span class="notfound-icon">🔍</span>
+        <div class="notfound-title">Voucher Tidak Ditemukan</div>
+        <p class="notfound-sub">
+          Kode <strong style="font-family:'DM Mono',monospace;color:var(--cream);letter-spacing:1px;">${code}</strong>
+          tidak ditemukan dalam sistem kami.<br/>
+          Pastikan kode diketik dengan benar, atau hubungi admin jika kamu merasa ini adalah kesalahan.
+        </p>
+        <div class="action-row">
+          <a href="https://wa.me/6285167060863" class="btn-wa">💬 Hubungi Admin</a>
+          <button class="btn-outline" onclick="clearResult()">Coba Kode Lain</button>
+        </div>
+      </div>
+    `;
+    showToast('error', 'Kode voucher tidak ditemukan.');
+  }
+
+  // ── RENDER PENDING ────────────────────────
+  function renderPending(v) {
+    document.getElementById('resultArea').innerHTML = `
+      <div class="pending-card">
+        <div class="pending-icon">⏳</div>
+        <div class="pending-title">Menunggu Konfirmasi Admin</div>
+        <p class="pending-sub">
+          Voucher dengan kode <strong style="font-family:'DM Mono',monospace;color:var(--gold-light);letter-spacing:1px;">${v.kode}</strong>
+          atas nama <strong style="color:var(--cream);">${v.nama}</strong> sedang dalam proses verifikasi.<br/>
+          Tim kami akan mengaktifkan voucher Anda dalam <strong style="color:#eab308;">1×24 jam</strong> di hari kerja.
+        </p>
+
+        <div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.15);border-radius:14px;padding:20px 24px;margin-bottom:24px;text-align:left;">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(234,179,8,0.08);font-size:14px;">
+            <span style="color:rgba(249,243,227,0.4);">Kode Voucher</span>
+            <span style="font-family:'DM Mono',monospace;color:#eab308;letter-spacing:1px;">${v.kode}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(234,179,8,0.08);font-size:14px;">
+            <span style="color:rgba(249,243,227,0.4);">Nama Jemaah</span>
+            <span style="font-weight:600;">${v.nama}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+            <span style="color:rgba(249,243,227,0.4);">Order ID</span>
+            <span style="font-family:'DM Mono',monospace;color:rgba(249,243,227,0.7);font-size:13px;">${v.order_id}</span>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <a href="https://wa.me/6285167060863" class="btn-wa">💬 Tanya Status ke Admin</a>
+          <button class="btn-outline" onclick="clearResult()">Cek Kode Lain</button>
+        </div>
+      </div>
+    `;
+    showToast('info', '⏳ Voucher masih menunggu konfirmasi admin.');
+  }
+
+  // ── RENDER USED ───────────────────────────
+  function renderUsed(v) {
+    document.getElementById('resultArea').innerHTML = `
+      <div class="used-card">
+        <div style="font-size:40px;margin-bottom:16px;">✓</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:10px;color:rgba(249,243,227,0.5);">Voucher Telah Digunakan</div>
+        <p style="font-size:14px;color:rgba(249,243,227,0.35);line-height:1.75;margin-bottom:24px;">
+          Voucher <strong style="font-family:'DM Mono',monospace;letter-spacing:1px;">${v.kode}</strong>
+          atas nama <strong>${v.nama}</strong> telah berhasil digunakan.<br/>
+          Terima kasih sudah mempercayai Voucher Umroh untuk perjalanan ibadah Anda. 🕋
+        </p>
+        <div class="action-row">
+          <a href="https://link.id" class="btn-outline">🛒 Beli Voucher Baru</a>
+          <a href="https://wa.me/6285167060863" class="btn-wa">💬 Hubungi Kami</a>
+        </div>
+      </div>
+    `;
+    showToast('info', 'Voucher ini sudah pernah digunakan.');
+  }
+
+  // ── RENDER ACTIVE — DIGITAL CARD ──────────
+  function renderActive(v) {
+    const rencanaFmt = v.rencana
+      ? new Date(v.rencana).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'})
+      : '—';
+    const createdFmt = v.created_at
+      ? new Date(v.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'})
+      : '—';
+
+    document.getElementById('resultArea').innerHTML = `
+      <div class="active-wrap">
+
+        <div class="active-header">
+          <div class="active-badge">
+            <div class="active-dot"></div>
+            VOUCHER AKTIF & SIAP DIGUNAKAN
+          </div>
+          <button class="download-btn" id="dlBtn" onclick="downloadCard()">
+            ⬇ Unduh Kartu Digital
+          </button>
+        </div>
+
+        <!-- CARD PREVIEW -->
+        <div class="card-preview-wrap" id="previewWrap">
+          <div class="card-scale-wrap" id="scaleWrap">
+            <div id="digitalCard">
+
+              <!-- bg layers -->
+              <div class="dc-bg-hex"></div>
+              <div class="dc-glow-tl"></div>
+              <div class="dc-glow-br"></div>
+
+              <!-- right islamic panel -->
+              <div class="dc-right-panel">
+                <div class="dc-right-pattern"></div>
+              </div>
+
+              <!-- gold lines -->
+              <div class="dc-gold-line-top"></div>
+              <div class="dc-gold-line-bottom"></div>
+
+              <!-- top arc -->
+              <div class="dc-top-arc"></div>
+
+              <!-- logo -->
+              <div class="dc-logo-area">
+                <div class="dc-logo-icon">🕋</div>
+                <div class="dc-logo-name">VOUCHER UMROH</div>
+              </div>
+
+              <!-- main content -->
+              <div class="dc-content">
+                <div class="dc-title-row">
+                  <div class="dc-pretitle">KARTU DISKON RESMI</div>
+                  <div class="dc-title">UMRAH VOUCHER</div>
+                </div>
+
+                <div class="dc-fields">
+                  <div class="dc-field">
+                    <div class="dc-field-label">Kode Voucher</div>
+                    <div class="dc-field-value code-val">${v.kode}</div>
+                  </div>
+                  <div class="dc-field">
+                    <div class="dc-field-label">Nama Jemaah</div>
+                    <div class="dc-field-value">${v.nama}</div>
+                  </div>
+                  <div class="dc-field">
+                    <div class="dc-field-label">Kota Domisili</div>
+                    <div class="dc-field-value">${v.kota}</div>
+                  </div>
+                  <div class="dc-field">
+                    <div class="dc-field-label">Travel Tujuan</div>
+                    <div class="dc-field-value">${v.travel}</div>
+                  </div>
+                  <div class="dc-field">
+                    <div class="dc-field-label">Rencana Berangkat</div>
+                    <div class="dc-field-value">${rencanaFmt}</div>
+                  </div>
+                </div>
+
+                <div class="dc-bottom">
+                  <div class="dc-qr-wrap" id="qrBox"></div>
+                  <div class="dc-amount-box">
+                    <div class="dc-amount-label">NILAI DISKON</div>
+                    <div class="dc-amount-val shimmer">Rp 500.000</div>
+                    <div class="dc-amount-note">berlaku di semua travel umroh</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- active stamp -->
+              <div class="dc-stamp">✓ AKTIF · SIAP DIGUNAKAN</div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- INFO STRIPS -->
+        <div class="info-strips">
+          <div class="info-strip">
+            <div class="is-label">ORDER ID</div>
+            <div class="is-value gold">${v.order_id}</div>
+          </div>
+          <div class="info-strip">
+            <div class="is-label">TANGGAL DAFTAR</div>
+            <div class="is-value">${createdFmt}</div>
+          </div>
+          <div class="info-strip">
+            <div class="is-label">STATUS</div>
+            <div class="is-value green">✓ Aktif</div>
+          </div>
+        </div>
+
+        <div class="action-row" style="margin-top:24px;">
+          <a href="https://wa.me/6285167060863" class="btn-wa">💬 Hubungi Admin</a>
+          <button class="btn-outline" onclick="clearResult()">🔍 Cek Kode Lain</button>
+        </div>
+
+      </div>
+    `;
+
+    // Scale card to fit container
+    scaleCard();
+    window.addEventListener('resize', scaleCard);
+
+    // Generate QR Code
+    setTimeout(() => {
+      const qrBox = document.getElementById('qrBox');
+      if (qrBox) {
+        try {
+          new QRCode(qrBox, {
+            text: v.kode,
+            width: 70,
+            height: 70,
+            colorDark: '#030f08',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } catch(e) {
+          qrBox.innerHTML = `<div style="font-size:9px;text-align:center;color:#030f08;font-family:monospace;line-height:1.3;">${v.kode}</div>`;
+        }
+      }
+    }, 100);
+
+    showToast('success', '✓ Voucher aktif ditemukan!');
+  }
+
+  // ── SCALE CARD TO FIT SCREEN ──────────────
+  function scaleCard() {
+    const preview   = document.getElementById('previewWrap');
+    const scaleWrap = document.getElementById('scaleWrap');
+    if (!preview || !scaleWrap) return;
+
+    const containerW = preview.offsetWidth;
+    const cardW      = 780;
+    const scale      = Math.min(1, containerW / cardW);
+
+    scaleWrap.style.transform = `scale(${scale})`;
+    preview.style.height = (460 * scale) + 'px';
+  }
+
+  // ── DOWNLOAD AS PNG ───────────────────────
+  function downloadCard() {
+    const btn  = document.getElementById('dlBtn');
+    const card = document.getElementById('digitalCard');
+    if (!card) return;
+
+    btn.innerHTML = '<span class="spinner"></span> Menyiapkan...';
+    btn.disabled  = true;
+
+    // Clone card to export wrapper at full size (no scaling)
+    const exportWrap = document.getElementById('exportWrap');
+    const clone      = card.cloneNode(true);
+    clone.style.transform  = 'none';
+    clone.style.borderRadius = '20px';
+    exportWrap.innerHTML = '';
+    exportWrap.appendChild(clone);
+
+    setTimeout(() => {
+      html2canvas(clone, {
+        width: 780,
+        height: 460,
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      }).then(canvas => {
+        const link = document.createElement('a');
+        const code = document.getElementById('codeInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'-');
+        link.download = `VoucherUmroh-${code}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('success', '✓ Kartu digital berhasil diunduh!');
+      }).catch(() => {
+        showToast('error', 'Gagal mengunduh. Coba lagi.');
+      }).finally(() => {
+        btn.innerHTML = '⬇ Unduh Kartu Digital';
+        btn.disabled  = false;
+        exportWrap.innerHTML = '';
+      });
+    }, 400);
+  }
+
+  // ── CLEAR RESULT ──────────────────────────
+  function clearResult() {
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('resultArea').innerHTML = '';
+    document.getElementById('codeInput').value = '';
+    document.getElementById('searchBtn').disabled = true;
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ── TOAST ─────────────────────────────────
+  let toastTimer;
+  function showToast(type, msg) {
+    const t = document.getElementById('toast');
+    t.className  = `toast ${type} show`;
+    t.textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
